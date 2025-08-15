@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Yapılacaklar Listesi</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+            body {
+                font-family: 'Poppins', sans-serif;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                min-height: 100vh;
+            }
+
+            .task-item:hover .task-actions {
+                opacity: 1;
+            }
+
+            .task-actions {
+                transition: opacity 0.3s ease;
+            }
+
+            .shake {
+                animation: shake 0.5s;
+            }
+
+            @keyframes shake {
+                0%, 100% {
+                    transform: translateX(0);
+                }
+                10%, 30%, 50%, 70%, 90% {
+                    transform: translateX(-5px);
+                }
+                20%, 40%, 60%, 80% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .checked {
+                position: relative;
+            }
+
+            .checked::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 10%;
+                width: 0;
+                height: 2px;
+                background: #4a5568;
+                animation: strike 0.3s ease-out forwards;
+            }
+            @keyframes strike {
+                to {
+                    width: 100%;
+                    left: -40px;
+                }
+            }
+        </style>
+    </head>
+    <body class="py-10 px-4 sm:px-10">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2"> Yapılacaklar Listem</h1>
+                <p class="text-gray-600">Günlük görevlerinizi takip edin</p>
+            </div>
+            <div class="mb-8 rounded-xl overflow-hidden shadow-lg">
+                <img src="ttps://placehold.co/800x300/4F46E5/FFFFFF" 
+                alt="Modern çalışma alanı: Masada dizüstü bilgisayar, not defteri ve kalemler ile minimalist ofis düzeni" 
+                class="w-full h-auto">
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-plus-cicle text-blue-500 text-2xl mr-3"></i>
+                    <h2 class="text-2xl font-semibold text-gray-800">Yeni Görev Ekle</h2>
+                </div>
+
+                <form id="task-form" class="flex gap-2">
+                    <input type="text" id="task-input" placeholder="Görev girin" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent required">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition duration-200 flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Ekle
+                    </button>
+                </form>
+
+                <div class="mt-3 flex justify-between text-sm text-gray-500">
+                    <div>
+                        Toplam: <span id="total-count" class="font-semibold">0</span> görev
+                    </div>
+                    <div>
+                        Tamamlanan: <span id="completed-count" class="font-semibold">0</span> görev
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="flex items-center bg-gray-50 px-6 py-4 border-b">
+                <i class="fas fa-tasks text-blue-500 text-xl mr-3"></i>
+                <h2 class="text-xl font-semibold text-gray-800">Görevlerim</h2>
+            </div>
+
+            <div id="task-list" class="divide-y divide-gray-200">
+                <!-- Görevler buraya eklenecek -->
+                 <div class="task-item p-4 flex items-center hover:bg-gray-50 relative">
+                    <div class="flex items-center flex-1">
+                        <input type="checkbox" id="task-checkbox" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3 cursor-pointer">
+                        <label for="task-checkbox" class="sr-only">Görevi tamamla</label>
+                        <span class="text-gray-800">Kahvaltı yap.</span>
+                    </div>
+                    <div class="task-actions opacity-0 flex gap-2">
+                        <button class="edit-btn px-2 py-1 text-blue-500 hover:text-blue-700" title="Düzenle">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn px-2 py-1 text-red-500 hover:text-red-700" title="Görevi sil">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="empty-message" class="hidden p-8 text-center">
+                <img src="https://placehold.co/200/DDD/999999" 
+                alt="Boş liste ikonu: Mutlu emoji ve ünlem işareti" 
+                class="mx-auto mb-4 w-24 h-24 opacity-70">
+                <h3 class="text-xl font-medium text-gray-600 mb-2"> Görev Bulunamadı!</h3>
+                <p class="text-gray-500"> Henüz hiç görev eklemediniz. Yukarıdaki formu kullanarak yeni görev ekleyebilirsiniz.</p>
+            </div>
+
+            <div class="bg-gray-50 px-6 py-3 flex justifiy-between border-t">
+                <button id="filter-all" class="filter-btn active px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium">
+                    Tümü
+                </button>
+                <button id="filter-active" class="filter-btn px-3 py-1 rounded hover:bg-gray-200 text-gray-600">
+                    Aktif
+                </button>
+                <button id="filter-completed" class="filter-btn px-3 py-1 rounded hover:bg-gray-200 text-gray-600">
+                    Tamamlanan
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>
+                Görevleri tamamlamak için kutucuğa tıklayın, düzenlemek için kalem simgesini kullanın.
+            </p>
+        </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                //DOM elementleri
+                const taskForm = document.getElementById('task-form');
+                const taskInput = document.getElementById('task-input');
+                const taskList = document.getElementById('task-list');
+                const emptyMessage = document.getElementById('empty-message');
+                const totalCount = document.getElementById('total-count');
+                const completedCount = document.getElementById('completed-count');
+                const filterAll = document.getElementById('filter-all');
+                const filterActive = document.getElementById('filter-active');
+                const filterCompleted = document.getElementById('filter-completed');
+
+                //görevler dizisi
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+                //sayfa yüklenince görevleri render et
+                renderTasks();
+                updateCounters();
+
+                //Görev ekleme formu submit
+                taskForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const taskText = taskInput.value.trim();
+                    if (taskText) {
+                        addTask(taskText);
+                        taskInput.value = '';
+                        taskInput.focus();
+                    }
+                });
+
+                //filtreleme butonları
+                filterAll.addEventListener('click', () => filterTasks('all'));
+                filterActive.addEventListener('click', () => filterTasks('active'));
+                filterCompleted.addEventListener('click', () => filterTasks('completed'));
+
+                //Görev ekleme fonksi
+                function addTask(text) {
+                    const newTask = {
+                        id: Date.now(),
+                        text: text,
+                        completed: false
+                    };
+                    tasks.push(newTask);
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    renderTasks();
+                }
+
+                //Görevleri render etme fonk
+                function renderTasks(filter='all') {
+                    taskList.innerHTML = '';
+                    task.forEach(task => {
+                        if (filter === 'active' && task.completed) return;
+                        if (filter === 'completed' && !task.completed) return;
+                        const taskItem = document.createElement('div');
+                        taskItem.className = `task-item p-4 flex items-center hover:bg-gray-50 relative ${task.completed ? 'checked' : ''}`;
+                        taskItem.innerHTML=`
+                            <div class="flex items-center flex-1">
+                                input type="checkbox class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3 cursor-pointer" ${task.completed ? 'checked' : ''} data-id="${task.id}">
+                                <span class="text-gray-800">${task.text}</span>
+                            </div>
+                            <div class="task-actions opacity-0 flex gap-2">
+                                <button class="edit-btn px-2 py-1 text-blue-500 hover:text-blue-700" data-id="${task.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-btn px-2 py-1 text-red-500 hover:text-red-700" data-id="${task.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        `;
+                        taskList.appendChild(taskItem);
+                        //checkbox event
+                        taskItem.querySelector('input[type="checkbox"]').addEventListener('change', function() {
+                            task.completed = this.checked;
+                            localStorage.setItem('tasks', JSON.stringify(tasks));
+                            renderTasks(filter);
+                        });
+
+                        //silme butonu işi
+                        taskItem.querySelector('.delete-btn').addEventListener('click', function(){
+                            tasks= tasks.filter(t => t.id !== task.id);
+                            localStorage.setItem('tasks', JSON.stringify(tasks));
+                            renderTasks(filter);
+                        });
+                    });
+
+                    //boş liste mesajı ver
+                    emptyMessage.classList.toggle('hidden', tasks.length > 0);
+                    updateCounters();
+                }
+
+                //görev sayacı güncelleme
+                function updateCounters() {
+                    totalCount.textContent = tasks.lenght;
+                    completedCount.textContent = tasks.filter(task => task.completed).length;
+                }
+
+                //filtreleme fonksiyonu
+                function filterTasks(filter) {
+                    renderTasks(filter);
+                    document.querySelectorAll('.filter-btn').forEach(btn =>
+                        btn.classList.remove('active'));
+                    document.getElementById(`filter-${filter}`).classList.add('active');
+                    }
+                });
+        </script>
+    </body>
+<html>
